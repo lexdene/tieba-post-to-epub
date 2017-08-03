@@ -1,4 +1,4 @@
 aiohttp
 lxml
-markdown
 ebooklib
+Jinja2
