@@ -1,8 +1,7 @@
 import asyncio
 import argparse
-from io import StringIO
 
-from builders import Builder
+from builders import get_builder
 
 
 def parse_args():
@@ -34,13 +33,10 @@ def parse_args():
     return args
 
 
-
-
-
 async def main():
     opts = parse_args()
 
-    b = Builder.create(opts)
+    b = get_builder(opts)
     await b.run()
 
 

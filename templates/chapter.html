@@ -1,0 +1,20 @@
+<div class="page" id="page-{{page.page_num}}">
+  <h2>
+    第 {{page.page_num}} 页
+    <a class="headerlink" href="#page-{{page.page_num}}" title="Permalink to this headline">¶</a>
+  </h2>
+
+  {% for floor in page.floors %}
+    <div class="floor" id="page-{{page.page_num}}-floor-{{loop.index}}">
+      <h3>
+        {{floor.title}}
+        <a class="headerlink" href="#page-{{page.page_num}}-floor-{{loop.index}}" title="Permalink to this headline">¶</a>
+      </h3>
+      <div class="texts">
+        {% for text in floor.texts %}
+          <p>{{text}}</p>
+        {% endfor %}
+      </div>
+    </div>
+  {% endfor %}
+</div>
