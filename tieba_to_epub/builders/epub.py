@@ -1,7 +1,7 @@
 from io import StringIO
 
 from ebooklib import epub
-from jinja2 import Environment, FileSystemLoader, select_autoescape
+from jinja2 import Environment, PackageLoader, select_autoescape
 
 from .base import Builder
 
@@ -19,7 +19,7 @@ class EpubBuilder(Builder):
         book.set_language('zh-cn')
 
         env = Environment(
-            loader=FileSystemLoader('templates'),
+            loader=PackageLoader('tieba_to_epub', 'templates'),
             autoescape=select_autoescape(['xml', 'html']),
             enable_async=True,
         )

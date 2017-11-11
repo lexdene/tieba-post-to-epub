@@ -1,7 +1,7 @@
 import asyncio
 import argparse
 
-from builders import get_builder
+from .builders import get_builder
 
 
 def parse_args():
@@ -33,17 +33,13 @@ def parse_args():
     return args
 
 
-async def main():
+async def _main():
     opts = parse_args()
 
     b = get_builder(opts)
     await b.run()
 
 
-def _main():
+def main():
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(main())
-
-
-if __name__ == '__main__':
-    _main()
+    loop.run_until_complete(_main())

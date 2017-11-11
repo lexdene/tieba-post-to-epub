@@ -53,6 +53,8 @@ class Builder:
 
                 page_num += 1
 
+                break
+
     async def get_page(self, session, path, params, page_num):
         headers = {
             'User-Agent': USER_AGENT,
