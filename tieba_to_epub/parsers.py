@@ -2,6 +2,9 @@ from collections import namedtuple
 
 from lxml import etree
 
+from . import nodes
+
+
 Page = namedtuple(
     'Page',
     [
@@ -14,7 +17,7 @@ Page = namedtuple(
 )
 Floor = namedtuple(
     'Floor',
-    ['title', 'texts'],
+    ['title', 'nodes'],
     module=__name__,
 )
 
@@ -67,74 +70,75 @@ def parse_floor(ele):
 
     return Floor(
         title=title,
-        texts=list(
-            iter_text_from_floor(ele)
+        nodes=list(
+            iter_node_from_floor(ele)
         ),
     )
 
 
-def iter_text_from_floor(ele):
+def iter_node_from_floor(ele):
     for content_ele in ele.xpath(
         './/div[@class="d_post_content j_d_post_content "]'
     ):
-        for text in iter_text_from_content(content_ele):
-            text = text.strip()
+        last_node = None
+        for node in iter_node_from_content(content_ele):
+            if last_node:
+                if node.type == last_node.type:
+                    if node.type == nodes.NodeType.NEW_LINE:
+                        # do nothing
+                        pass
+                    elif node.type == nodes.NodeType.TEXT:
+                        last_node.text += node.text.strip()
+                else:
+                    yield last_node
+                    last_node = node
+            else:
+                last_node = node
 
-            if text:
-                yield text
+        if last_node and last_node.type != nodes.NodeType.NEW_LINE:
+            yield last_node
 
 
-def iter_text_from_content(root):
-    text = ''
-
+def iter_node_from_content(root):
     stop = False
 
     for event, ele in etree.iterwalk(
         root,
         events=('start', 'end'),
     ):
-        take = None
+        text = None
         if event == 'start':
             if ele.text:
-                take = ele.text.strip()
+                text = ele.text.strip()
 
-            if take:
+            if text:
                 if ele is root or ele.tag == 'a':
-                    # append but dont yield
-                    text += take
+                    yield nodes.TextNode(text)
                 elif ele.tag == 'p':
-                    # yield and yield and clean
-                    if text:
-                        yield text
-
-                    yield take
-
-                    text = ''
+                    yield nodes.NewLineNode()
+                    yield nodes.TextNode(text)
+                    yield nodes.NewLineNode()
+                elif ele.tag == 'img':
+                    # do nothing
+                    pass
                 else:
                     # no possible
-                    print(event, ele, ele.tag)
+                    print('start error:', event, ele, ele.tag, text)
                     stop = True
         elif ele is not root:
             if ele.tail:
-                take = ele.tail.strip()
+                text = ele.tail.strip()
 
-            if take:
+            if text:
                 if ele.tag == 'br':
-                    # yield and then append
-                    if text:
-                        yield text
-
-                    text = take
+                    yield nodes.NewLineNode()
+                    yield nodes.TextNode(text)
                 elif ele.tag in ('a', 'p', 'img'):
-                    # append but dont yield
-                    text += take
+                    yield nodes.TextNode(text)
                 else:
                     # no possible
-                    print(event, ele, ele.tag)
+                    print('end error:', event, ele, ele.tag, text)
                     stop = True
-
-    if text:
-        yield text
 
     if stop:
         raise ValueError('unexpected')

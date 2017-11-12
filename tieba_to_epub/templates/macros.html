@@ -1,0 +1,15 @@
+{% macro render_floor(floor, page, index) -%}
+  <div class="floor" id="page-{{page.page_num}}-floor-{{index}}">
+    <h3>
+      {{floor.title}}
+      <a class="headerlink" href="#page-{{page.page_num}}-floor-{{index}}" title="Permalink to this headline">¶</a>
+    </h3>
+    <div class="content">
+      {% for node in floor.nodes %}
+        {% if node.type.name == 'TEXT' %}
+          <p>{{node.text}}</p>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+{%- endmacro %}
