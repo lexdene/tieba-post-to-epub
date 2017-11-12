@@ -82,18 +82,25 @@ def iter_node_from_floor(ele):
     ):
         last_node = None
         for node in iter_node_from_content(content_ele):
-            if last_node:
-                if node.type == last_node.type:
-                    if node.type == nodes.NodeType.NEW_LINE:
-                        # do nothing
-                        pass
-                    elif node.type == nodes.NodeType.TEXT:
-                        last_node.text += node.text.strip()
-                else:
+            if node.type == nodes.NodeType.IMAGE:
+                if last_node:
                     yield last_node
-                    last_node = node
+                    last_node = None
+
+                yield node
             else:
-                last_node = node
+                if last_node:
+                    if node.type == last_node.type:
+                        if node.type == nodes.NodeType.NEW_LINE:
+                            # do nothing
+                            pass
+                        elif node.type == nodes.NodeType.TEXT:
+                            last_node.text += node.text.strip()
+                    else:
+                        yield last_node
+                        last_node = node
+                else:
+                    last_node = node
 
         if last_node and last_node.type != nodes.NodeType.NEW_LINE:
             yield last_node
@@ -110,6 +117,11 @@ def iter_node_from_content(root):
         if event == 'start':
             if ele.text:
                 text = ele.text.strip()
+
+            if ele.tag == 'img':
+                yield nodes.ImageNode(
+                    ele.get('src')
+                )
 
             if text:
                 if ele is root or ele.tag == 'a':

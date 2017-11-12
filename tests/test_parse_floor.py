@@ -118,8 +118,53 @@ class TestParseFloor(TestCase):
         floor = parse_floor(ele)
         nodes = floor.nodes
 
-        self.assertEqual(1, len(nodes))
-        self.assertEqual('asdfxyz', nodes[0].text)
+        self.assertEqual(3, len(nodes))
+
+        # index 0
+        self.assertEqual(NodeType.TEXT, nodes[0].type)
+        self.assertEqual('asdf', nodes[0].text)
+
+        # index 1
+        self.assertEqual(NodeType.IMAGE, nodes[1].type)
+        self.assertEqual('bcde', nodes[1].src)
+
+        # index 2
+        self.assertEqual(NodeType.TEXT, nodes[2].type)
+        self.assertEqual('xyz', nodes[2].text)
+
+    def test_floor_with_multi_img_tag(self):
+        source = '''
+          <div class="p_content">
+            <div class="d_post_content j_d_post_content ">
+              asdf
+              <img src="bcde" />
+              <img src="fghi" />
+              xyz
+            </div>
+          </div>
+        '''
+
+        ele = etree.HTML(source)
+        floor = parse_floor(ele)
+        nodes = floor.nodes
+
+        self.assertEqual(4, len(nodes))
+
+        # index 0
+        self.assertEqual(NodeType.TEXT, nodes[0].type)
+        self.assertEqual('asdf', nodes[0].text)
+
+        # index 1
+        self.assertEqual(NodeType.IMAGE, nodes[1].type)
+        self.assertEqual('bcde', nodes[1].src)
+
+        # index 2
+        self.assertEqual(NodeType.IMAGE, nodes[2].type)
+        self.assertEqual('fghi', nodes[2].src)
+
+        # index 3
+        self.assertEqual(NodeType.TEXT, nodes[3].type)
+        self.assertEqual('xyz', nodes[3].text)
 
     def test_floor_with_br_tag(self):
         source = '''

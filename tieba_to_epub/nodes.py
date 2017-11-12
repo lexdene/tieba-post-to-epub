@@ -4,6 +4,7 @@ from enum import Enum
 class NodeType(Enum):
     NEW_LINE = 1
     TEXT = 2
+    IMAGE = 3
 
 
 class BaseNode:
@@ -25,3 +26,10 @@ class TextNode(BaseNode):
 
     def __init__(self, text):
         self.text = text
+
+
+class ImageNode(BaseNode):
+    type = NodeType.IMAGE
+
+    def __init__(self, src):
+        self.src = src

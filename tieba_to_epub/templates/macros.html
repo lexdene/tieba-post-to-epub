@@ -8,6 +8,8 @@
       {% for node in floor.nodes %}
         {% if node.type.name == 'TEXT' %}
           <p>{{node.text}}</p>
+        {% elif node.type.name == 'IMAGE' %}
+          <div><img src="{{node.src}}" /></div>
         {% endif %}
       {% endfor %}
     </div>

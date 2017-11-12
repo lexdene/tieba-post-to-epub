@@ -53,7 +53,6 @@ class EpubBuilder(Builder):
             buffer.write(fragment)
 
         content = buffer.getvalue()
-        # print(content)
         chapter = epub.EpubHtml(
             title='第 %d 页' % page.page_num,
             file_name='page_%d.html' % page.page_num,
