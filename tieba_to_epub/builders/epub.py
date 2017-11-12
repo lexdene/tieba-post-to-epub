@@ -1,7 +1,6 @@
 from io import StringIO
 
 from ebooklib import epub
-from jinja2 import Environment, PackageLoader, select_autoescape
 
 from .base import Builder
 
@@ -18,11 +17,7 @@ class EpubBuilder(Builder):
         )
         book.set_language('zh-cn')
 
-        env = Environment(
-            loader=PackageLoader('tieba_to_epub', 'templates'),
-            autoescape=select_autoescape(['xml', 'html']),
-            enable_async=True,
-        )
+        env = self.jinja_env
         tmpl = env.get_template('chapter.html')
 
         chapter_list = []

@@ -1,25 +1,12 @@
-from collections import namedtuple
-
 import aiohttp
-from lxml import etree
+from jinja2 import Environment, PackageLoader, select_autoescape
 
+from ..parsers import parse_page
 
 USER_AGENT = (
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) '
     'AppleWebKit/537.36 (KHTML, like Gecko)'
     'Chrome/60.0.3112.78 Safari/537.36'
-)
-
-
-Page = namedtuple(
-    'Page',
-    ['page_num', 'floors'],
-    module=__name__,
-)
-Floor = namedtuple(
-    'Floor',
-    ['title', 'texts'],
-    module=__name__,
 )
 
 
@@ -73,121 +60,20 @@ class Builder:
 
             text = await resp.text()
 
-            doc = etree.HTML(text)
+            page = parse_page(text, page_num)
 
-            if self.title is None:
-                for ele in doc.xpath('//h3'):
-                    print(ele.text)
-                    self.title = ele.text
+            if self.title is None and page.title:
+                self.title = page.title
 
-            if self.total_page is None:
-                for ele in doc.xpath(
-                    '//div[@class="pb_footer"]//div[@class="l_thread_info"]'
-                    '/ul[@class="l_posts_num"]/li[@class="l_reply_num"]'
-                    '/span[@class="red"][2]'
-                ):
-                    print(ele.text)
-                    self.total_page = int(ele.text)
+            if self.total_page is None and page.total_page:
+                self.total_page = page.total_page
 
-            floors = [
-                self._get_floor_by_ele(ele)
-                for ele in doc.xpath(
-                    '//div[contains(concat(" ", @class, " "), " d_post_content_main ")]'  # noqa
-                )
-            ]
+            return page
 
-        return Page(
-            page_num=page_num,
-            floors=floors,
+    @property
+    def jinja_env(self):
+        return Environment(
+            loader=PackageLoader('tieba_to_epub', 'templates'),
+            autoescape=select_autoescape(['xml', 'html']),
+            enable_async=True,
         )
-
-    def _get_floor_by_ele(self, ele):
-        title = ' '.join([
-            info_ele.text
-            for info_ele in ele.xpath('.//span[@class="tail-info"]')
-        ])
-
-        texts = []
-
-        for content_ele in ele.xpath(
-            './/div[@class="d_post_content j_d_post_content "]'
-        ):
-            texts = [
-                text.strip()
-                for text in get_text_iter_from_ele(content_ele)
-            ]
-
-        return Floor(
-            title=title,
-            texts=texts
-        )
-
-
-def get_text_iter_from_ele(root):
-    print('=' * 50)
-
-    text = ''
-
-    stop = False
-    print_html = False
-
-    for event, ele in etree.iterwalk(
-        root,
-        events=('start', 'end'),
-    ):
-        if ele.tag == 'a':
-            print_html = True
-
-            if event == 'start':
-                print('=' * 20)
-                print(ele.text)
-
-        take = None
-        if event == 'start':
-            if ele.text:
-                take = ele.text.strip()
-
-            if take:
-                if ele is root or ele.tag == 'a':
-                    # append but dont yield
-                    text += take
-                elif ele.tag == 'p':
-                    # yield and yield and clean
-                    if text:
-                        yield text
-
-                    yield take
-
-                    text = ''
-                else:
-                    # no possible
-                    print(event, ele, ele.tag)
-                    stop = True
-        elif ele is not root:
-            if ele.tail:
-                take = ele.tail.strip()
-
-            if take:
-                if ele.tag == 'br':
-                    # yield and then append
-                    if text:
-                        yield text
-
-                    text = take
-                elif ele.tag in ('a', 'p', 'img'):
-                    # append but dont yield
-                    text += take
-                else:
-                    # no possible
-                    print(event, ele, ele.tag)
-                    stop = True
-
-    if text:
-        yield text
-
-    if print_html:
-        print(etree.tostring(root, encoding='unicode', pretty_print=True))
-
-    if stop:
-        print(etree.tostring(root, encoding='unicode', pretty_print=True))
-        raise ValueError(1)
