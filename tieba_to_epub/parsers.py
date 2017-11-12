@@ -65,23 +65,26 @@ def parse_floor(ele):
         for info_ele in ele.xpath('.//span[@class="tail-info"]')
     ])
 
-    texts = []
-
-    for content_ele in ele.xpath(
-        './/div[@class="d_post_content j_d_post_content "]'
-    ):
-        texts = [
-            text.strip()
-            for text in get_text_iter_from_ele(content_ele)
-        ]
-
     return Floor(
         title=title,
-        texts=texts
+        texts=list(
+            iter_text_from_floor(ele)
+        ),
     )
 
 
-def get_text_iter_from_ele(root):
+def iter_text_from_floor(ele):
+    for content_ele in ele.xpath(
+        './/div[@class="d_post_content j_d_post_content "]'
+    ):
+        for text in iter_text_from_content(content_ele):
+            text = text.strip()
+
+            if text:
+                yield text
+
+
+def iter_text_from_content(root):
     text = ''
 
     stop = False
