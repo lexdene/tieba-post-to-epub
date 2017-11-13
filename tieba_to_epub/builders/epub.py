@@ -18,6 +18,9 @@ class EpubBuilder(Builder):
         )
         book.set_language('zh-cn')
 
+        # remove duplicate file
+        book._images = {}
+
         env = self.jinja_env
         tmpl = env.get_template('chapter.html')
 
