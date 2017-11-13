@@ -126,7 +126,7 @@ class TestParseFloor(TestCase):
 
         # index 1
         self.assertEqual(NodeType.IMAGE, nodes[1].type)
-        self.assertEqual('bcde', nodes[1].src)
+        self.assertEqual('bcde', nodes[1].url)
 
         # index 2
         self.assertEqual(NodeType.TEXT, nodes[2].type)
@@ -156,11 +156,11 @@ class TestParseFloor(TestCase):
 
         # index 1
         self.assertEqual(NodeType.IMAGE, nodes[1].type)
-        self.assertEqual('bcde', nodes[1].src)
+        self.assertEqual('bcde', nodes[1].url)
 
         # index 2
         self.assertEqual(NodeType.IMAGE, nodes[2].type)
-        self.assertEqual('fghi', nodes[2].src)
+        self.assertEqual('fghi', nodes[2].url)
 
         # index 3
         self.assertEqual(NodeType.TEXT, nodes[3].type)
