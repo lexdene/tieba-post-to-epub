@@ -1,7 +1,11 @@
+import os
+import urllib
+
 import aiohttp
 from jinja2 import Environment, PackageLoader, select_autoescape
 
 from ..parsers import parse_page
+from ..nodes import NodeType
 
 USER_AGENT = (
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) '
@@ -61,15 +65,24 @@ class Builder:
 
             text = await resp.text()
 
-            page = parse_page(text, page_num)
+        page = parse_page(text)
+        page = page._replace(page_num=page_num)
 
-            if self.title is None and page.title:
-                self.title = page.title
+        for floor in page.floors:
+            for node in floor.nodes:
+                if node.type == NodeType.IMAGE:
+                    await _trans_image_node(
+                        node,
+                        session,
+                    )
 
-            if self.total_page is None and page.total_page:
-                self.total_page = page.total_page
+        if self.title is None and page.title:
+            self.title = page.title
 
-            return page
+        if self.total_page is None and page.total_page:
+            self.total_page = page.total_page
+
+        return page
 
     @property
     def jinja_env(self):
@@ -78,3 +91,19 @@ class Builder:
             autoescape=select_autoescape(['xml', 'html']),
             enable_async=True,
         )
+
+
+async def _trans_image_node(node, session):
+    url = node.url
+    print(url)
+
+    r = urllib.parse.urlparse(url)
+    # print(r)
+
+    basename = os.path.basename(r.path)
+    print(basename)
+    node.name = basename
+
+    async with session.get(url, headers={'User-Agent': USER_AGENT}) as resp:
+        node.content = await resp.read()
+        print('content length', len(node.content))

@@ -31,5 +31,7 @@ class TextNode(BaseNode):
 class ImageNode(BaseNode):
     type = NodeType.IMAGE
 
-    def __init__(self, src):
-        self.src = src
+    def __init__(self, url):
+        self.url = url
+        self.name = ''
+        self.content = b''

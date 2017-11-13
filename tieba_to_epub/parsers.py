@@ -30,7 +30,7 @@ def dump_element(ele):
     )
 
 
-def parse_page(text, page_num):
+def parse_page(text):
     doc = etree.HTML(text)
 
     title = None
@@ -55,7 +55,7 @@ def parse_page(text, page_num):
     ]
 
     return Page(
-        page_num=page_num,
+        page_num=None,
         title=title,
         total_page=total_page,
         floors=floors,
