@@ -28,6 +28,12 @@ def parse_args():
         default=False,
         help='see louzhu (default: false)'
     )
+    parser.add_argument(
+        '--page-num',
+        metavar='N',
+        type=int,
+        help='fetch only one page (default: fetch all pages)',
+    )
 
     args = parser.parse_args()
     return args

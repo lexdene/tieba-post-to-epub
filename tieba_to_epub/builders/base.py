@@ -35,17 +35,20 @@ class Builder:
         if self.opts.see_lz:
             params['see_lz'] = '1'
 
-        page_num = 1
-
         async with aiohttp.ClientSession() as session:
-            while self.total_page is None or page_num <= self.total_page:
-                page = await self.get_page(session, path, params, page_num)
+            if self.opts.page_num is None:
+                page_num = 1
+
+                while self.total_page is None or page_num <= self.total_page:
+                    page = await self.get_page(session, path, params, page_num)
+                    yield page
+
+                    page_num += 1
+            else:
+                page = await self.get_page(
+                    session, path, params, self.opts.page_num
+                )
                 yield page
-
-                page_num += 1
-
-                # for test
-                break
 
     async def get_page(self, session, path, params, page_num):
         headers = {
