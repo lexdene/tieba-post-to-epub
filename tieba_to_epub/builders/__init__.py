@@ -13,7 +13,6 @@ __all__ = [
 def get_builder(opts):
     _, ext = os.path.splitext(opts.output)
     ext = ext.lstrip('.')
-    print('ext:', ext)
 
     for value in globals().values():
         if isinstance(value, type) and \

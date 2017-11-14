@@ -59,11 +59,12 @@ class Builder:
             params['pn'] = page_num
 
         async with session.get(path, params=params, headers=headers) as resp:
-            print('url:', resp.url)
-            print('status: %d' % resp.status)
             if resp.status != 200:
                 raise ValueError(
-                    'status code error: %d' % resp.status
+                    'status code error: %d. url: %s' % (
+                        resp.status,
+                        resp.url
+                    )
                 )
 
             text = await resp.text()
@@ -98,15 +99,16 @@ class Builder:
 
 async def _trans_image_node(node, session):
     url = node.url
-    print(url)
-
     r = urllib.parse.urlparse(url)
-    # print(r)
-
-    basename = os.path.basename(r.path)
-    print(basename)
-    node.name = basename
+    node.name = os.path.basename(r.path)
 
     async with session.get(url, headers={'User-Agent': USER_AGENT}) as resp:
+        if resp.status != 200:
+            raise ValueError(
+                'status code error: %d. url: %s' % (
+                    resp.status,
+                    resp.url
+                )
+            )
+
         node.content = await resp.read()
-        print('content length', len(node.content))

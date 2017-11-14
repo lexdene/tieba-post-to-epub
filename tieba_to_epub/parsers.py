@@ -35,7 +35,6 @@ def parse_page(text):
 
     title = None
     for ele in doc.xpath('//h3'):
-        print(ele.text)
         title = ele.text
 
     total_page = None
@@ -44,7 +43,6 @@ def parse_page(text):
         '/ul[@class="l_posts_num"]/li[@class="l_reply_num"]'
         '/span[@class="red"][2]'
     ):
-        print(ele.text)
         total_page = int(ele.text)
 
     floors = [
@@ -107,8 +105,6 @@ def iter_node_from_floor(ele):
 
 
 def iter_node_from_content(root):
-    stop = False
-
     for event, ele in etree.iterwalk(
         root,
         events=('start', 'end'),
@@ -135,8 +131,11 @@ def iter_node_from_content(root):
                     pass
                 else:
                     # no possible
-                    print('start error:', event, ele, ele.tag, text)
-                    stop = True
+                    raise ValueError(
+                        'unexpected tag: %s when %s with text %s' % (
+                            ele.tag, event, text
+                        )
+                    )
         elif ele is not root:
             if ele.tail:
                 text = ele.tail.strip()
@@ -149,8 +148,8 @@ def iter_node_from_content(root):
                     yield nodes.TextNode(text)
                 else:
                     # no possible
-                    print('end error:', event, ele, ele.tag, text)
-                    stop = True
-
-    if stop:
-        raise ValueError('unexpected')
+                    raise ValueError(
+                        'unexpected tag: %s when %s with text %s' % (
+                            ele.tag, event, text
+                        )
+                    )
