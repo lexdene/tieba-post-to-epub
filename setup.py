@@ -9,7 +9,8 @@ setup(
     author_email='elephant_liu@mail.dlut.edu.cn',
     url='https://github.com/lexdene/tieba-post-to-epub',
     license='GPLv3',
-    packages=find_packages(),
+    packages=find_packages(exclude=['tests']),
+    package_data={'tieba_to_epub': ['templates/*']},
     install_requires=[
         'aiohttp',
         'lxml',
@@ -20,5 +21,6 @@ setup(
         'console_scripts': [
             'tieba-to-epub = tieba_to_epub.main:main'
         ]
-    }
+    },
+    platforms=['any'],
 )
