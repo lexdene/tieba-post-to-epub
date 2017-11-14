@@ -1,13 +1,19 @@
 from setuptools import setup, find_packages
 
+
+def get_long_description():
+    with open('README.rst') as f:
+        return f.read()
+
+
 name = 'tieba-to-epub'
 main_module_name = name.replace('-', '_')
 
 setup(
     name=name,
-    version='0.0.1',
+    version='0.0.2',
     description='convert baidu tieba post to epub',
-    long_description='',
+    long_description=get_long_description(),
     author='Elephant Liu',
     author_email='elephant_liu@mail.dlut.edu.cn',
     url='https://github.com/lexdene/tieba-post-to-epub',
