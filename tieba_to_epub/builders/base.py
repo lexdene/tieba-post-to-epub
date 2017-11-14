@@ -90,8 +90,10 @@ class Builder:
 
     @property
     def jinja_env(self):
+        package_name = __name__.split('.')[0]
+
         return Environment(
-            loader=PackageLoader('tieba_to_epub', 'templates'),
+            loader=PackageLoader(package_name, 'templates'),
             autoescape=select_autoescape(['xml', 'html']),
             enable_async=True,
         )

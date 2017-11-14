@@ -1,7 +1,10 @@
 from setuptools import setup, find_packages
 
+name = 'tieba-to-epub'
+main_module_name = name.replace('-', '_')
+
 setup(
-    name='tieba-to-epub',
+    name=name,
     version='0.0.1',
     description='convert baidu tieba post to epub',
     long_description='',
@@ -10,7 +13,7 @@ setup(
     url='https://github.com/lexdene/tieba-post-to-epub',
     license='GPLv3',
     packages=find_packages(exclude=['tests']),
-    package_data={'tieba_to_epub': ['templates/*']},
+    package_data={main_module_name: ['templates/*']},
     install_requires=[
         'aiohttp',
         'lxml',
@@ -19,7 +22,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'tieba-to-epub = tieba_to_epub.main:main'
+            '%s = %s.main:main' % (name, main_module_name)
         ]
     },
     platforms=['any'],
