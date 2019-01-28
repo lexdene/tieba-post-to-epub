@@ -122,7 +122,7 @@ def iter_node_from_content(root):
             if text:
                 if ele is root or ele.tag == 'a':
                     yield nodes.TextNode(text)
-                elif ele.tag == 'p':
+                elif ele.tag in ('p', 'div'):
                     yield nodes.NewLineNode()
                     yield nodes.TextNode(text)
                     yield nodes.NewLineNode()
