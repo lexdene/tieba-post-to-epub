@@ -104,6 +104,9 @@ async def _trans_image_node(node, session):
     r = urllib.parse.urlparse(url)
     node.name = os.path.basename(r.path)
 
+    if url.startswith('//'):
+        url = 'https:' + url
+
     async with session.get(url, headers={'User-Agent': USER_AGENT}) as resp:
         if resp.status != 200:
             raise ValueError(
