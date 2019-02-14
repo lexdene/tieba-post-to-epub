@@ -129,6 +129,8 @@ def iter_node_from_content(root):
                 elif ele.tag == 'img':
                     # do nothing
                     pass
+                elif ele.tag in ('span',):
+                    yield nodes.TextNode(text)
                 else:
                     # no possible
                     raise ValueError(
@@ -144,7 +146,7 @@ def iter_node_from_content(root):
                 if ele.tag == 'br':
                     yield nodes.NewLineNode()
                     yield nodes.TextNode(text)
-                elif ele.tag in ('a', 'p', 'img'):
+                elif ele.tag in ('a', 'p', 'img', 'span'):
                     yield nodes.TextNode(text)
                 else:
                     # no possible

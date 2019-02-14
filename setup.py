@@ -11,7 +11,7 @@ main_module_name = name.replace('-', '_')
 
 setup(
     name=name,
-    version='0.0.5',
+    version='0.0.6',
     description='convert baidu tieba post to epub',
     long_description=get_long_description(),
     author='Elephant Liu',
