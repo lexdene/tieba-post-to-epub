@@ -14,6 +14,38 @@ USER_AGENT = (
 )
 
 
+class ProgressBar:
+    def __init__(self, enable):
+        self.enable = enable
+
+    def progress(self, current, total):
+        if not self.enable:
+            return
+
+        pager = '%d/%s' % (
+            current, total or 'unknown',
+        )
+        star_width = 20
+        if not total:
+            star_count = 0
+        else:
+            star_count = current * star_width // total
+
+        s = '{stars:-<{width}} {pager:<20}'.format(
+            stars='*' * star_count,
+            width=star_width,
+            pager=pager,
+        )
+
+        print('\r%s' % s, end='\r')
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, type, value, trace):
+        print()
+
+
 class Builder:
     output_type = None
 
@@ -35,20 +67,29 @@ class Builder:
         if self.opts.see_lz:
             params['see_lz'] = '1'
 
-        async with aiohttp.ClientSession() as session:
-            if self.opts.page_num is None:
-                page_num = 1
+        with ProgressBar(self.opts.progress_bar) as bar:
+            async with aiohttp.ClientSession() as session:
+                if self.opts.page_num is None:
+                    page_num = 1
 
-                while self.total_page is None or page_num <= self.total_page:
-                    page = await self.get_page(session, path, params, page_num)
+                    while self.total_page is None or page_num <= self.total_page:
+                        bar.progress(page_num, self.total_page)
+
+                        page = await self.get_page(session, path, params, page_num)
+
+                        # refresh progress bar after set total page
+                        bar.progress(page_num, self.total_page)
+
+                        await self.process_floors(session, page)
+
+                        yield page
+
+                        page_num += 1
+                else:
+                    page = await self.get_page(
+                        session, path, params, self.opts.page_num
+                    )
                     yield page
-
-                    page_num += 1
-            else:
-                page = await self.get_page(
-                    session, path, params, self.opts.page_num
-                )
-                yield page
 
     async def get_page(self, session, path, params, page_num):
         headers = {
@@ -72,14 +113,6 @@ class Builder:
         page = parse_page(text)
         page = page._replace(page_num=page_num)
 
-        for floor in page.floors:
-            for node in floor.nodes:
-                if node.type == NodeType.IMAGE:
-                    await _trans_image_node(
-                        node,
-                        session,
-                    )
-
         if self.title is None and page.title:
             self.title = page.title
 
@@ -87,6 +120,15 @@ class Builder:
             self.total_page = page.total_page
 
         return page
+
+    async def process_floors(self, session, page):
+        for floor in page.floors:
+            for node in floor.nodes:
+                if node.type == NodeType.IMAGE:
+                    await _trans_image_node(
+                        node,
+                        session,
+                    )
 
     @property
     def jinja_env(self):

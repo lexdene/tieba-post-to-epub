@@ -34,6 +34,11 @@ def parse_args():
         type=int,
         help='fetch only one page (default: fetch all pages)',
     )
+    parser.add_argument(
+        '--no-progress-bar',
+        action="store_false",
+        dest="progress_bar"
+    )
 
     args = parser.parse_args()
     return args
