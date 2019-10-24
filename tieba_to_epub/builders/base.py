@@ -108,7 +108,7 @@ class Builder:
                     )
                 )
 
-            text = await resp.text()
+            text = await resp.text(errors='ignore')
 
         page = parse_page(text)
         page = page._replace(page_num=page_num)
